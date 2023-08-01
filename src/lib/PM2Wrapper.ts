@@ -7,10 +7,26 @@ import { switchMap } from 'rxjs/operators';
 export interface ProcessData {
     name: string;
     pid: number;
-    memory: string;
+    memory: number;
     cpu: number;
     pm_id: number;
     ip: string;
+    istances?: number;
+    outlogPath?: string;
+    errlogPath?: string;
+    pidPath?: string;
+    status?: string;
+    uptime?: number;
+    restarts?: number;
+    unstableRestarts?: number;
+    version?: string;
+    nodeVersion?: string;
+    watch?: boolean;
+    autorestart?: boolean;
+    execMode?: string;
+    execInterpreteur?: string;
+    execPath?: string;
+    createdAt?: number;
 }
 
 export class PM2Wrapper {
@@ -125,18 +141,36 @@ export class PM2Wrapper {
                     reject(err);
                 }
 
-                const processList:ProcessData[] = processDescriptionList.map(procDesc => {
+                const processList: ProcessData[] = processDescriptionList.map(procDesc => {
 
-// console.log(procDesc);
 
-                   let data:ProcessData = {
+
+                    let data: ProcessData = {
                         name: procDesc.name,
                         pid: procDesc.pid,
-                        memory: procDesc.monit.memory,
+                        memory: Number(procDesc.monit.memory),
                         cpu: procDesc.monit.cpu,
                         pm_id: procDesc.pm_id,
                         ip: this.getLocalIPAddress(),
+                        istances: procDesc.instances,
+                        outlogPath: procDesc.pm2_env.pm_out_log_path,
+                        errlogPath: procDesc.pm2_env.pm_err_log_path,
+                        pidPath: procDesc.pm2_env.pm_pid_path,
+                        status: procDesc.pm2_env.status,
+                        uptime: new Date().getTime() - procDesc.pm2_env.created_at,
+                        restarts: procDesc.pm2_env.restart_time,
+                        unstableRestarts: procDesc.pm2_env.unstable_restarts,
+                        version: procDesc.pm2_env.version,
+                        nodeVersion: procDesc.pm2_env.node_version,
+                        watch: procDesc.pm2_env.watch,
+                        autorestart: procDesc.pm2_env.autorestart,
+                        execMode: procDesc.pm2_env.exec_mode,
+                        execInterpreteur: procDesc.pm2_env.exec_interpreter,
+                        execPath: procDesc.pm2_env.pm_exec_path,
+                        createdAt: procDesc.pm2_env.created_at,
+
                     };
+
 
                     return data
                 });
@@ -159,7 +193,7 @@ export class PM2Wrapper {
         });
     }
 
-  getProcessDescriptionObservable(process: string | number, intervalMs: number = 1000): Observable<ProcessDescription> {
+    getProcessDescriptionObservable(process: string | number, intervalMs: number = 1000): Observable<ProcessDescription> {
         return timer(0, intervalMs).pipe(
             switchMap(() => new Promise<ProcessDescription>(resolve => resolve(this.describe(process))))
         );
@@ -171,7 +205,6 @@ export class PM2Wrapper {
         for (const devName in interfaces) {
             const iface = interfaces[devName];
 
-            console.log(iface);
             for (let i = 0; i < iface!.length; i++) {
                 const alias = iface![i];
                 if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
@@ -184,4 +217,3 @@ export class PM2Wrapper {
     }
 
 }
-    

@@ -44,7 +44,6 @@ export async function loadProcessesFromStorage() {
 export async function fetchProcesses(subnet:string) {
     const res = await fetch(`/api/remoteProcesses?subnet=${subnet}`);
     const data = await res.json();
-    console.log(data.allProcesses);
     localStorage.setItem('processes', JSON.stringify(data.allProcesses));
 	processesStore.replace(data.allProcesses);
 };
