@@ -12,12 +12,12 @@ Follow the steps below to setup the project:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/<your_username>/<your_repository>.git
+   git clone https://github.com/parotech123/hecate-pm2-explorer.git
    ```
 
 2. Install the dependencies:
    ```bash
-   cd <your_repository>
+   cd hecate-pm2-explorer
    npm install
    ```
 
@@ -33,7 +33,7 @@ Follow the steps below to setup the project:
 
 ## Usage
 
-1. Access the SvelteKit web interface at `http://localhost:5000`.
+1. Access the SvelteKit web interface at `http://localhost:3000`.
 
 2. Use the interface to manage PM2 processes on your servers.
 
