@@ -16,18 +16,18 @@ Follow the steps below to setup the project:
    ```
 
 2. Install the dependencies:
-   ```bash
+   ```
    cd hecate-pm2-explorer
    npm install
    ```
 
 3. Build the project:
-   ```bash
+   ```
    npm run build
    ```
 
 4. Start the project:
-   ```bash
+   ```
    npm run start
    ```
 
