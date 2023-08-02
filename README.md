@@ -1,38 +1,56 @@
-# create-svelte
+```markdown
+# PM2 API Wrapper with SvelteKit Interface
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+This project provides a TypeScript API Wrapper to interact with a PM2 instance and a SvelteKit interface to manage PM2 processes.
 
-## Creating a project
+## Description
 
-If you're seeing this, you've probably already done this step. Congrats!
+The project allows you to control PM2 processes on local and remote servers through a web interface built with SvelteKit. The functionality includes starting, stopping, and restarting processes, reading logs, and setting environment variables.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## Setup
 
-# create a new project in my-app
-npm create svelte@latest my-app
+Follow the steps below to setup the project:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/<your_username>/<your_repository>.git
+   ```
+
+2. Install the dependencies:
+   ```bash
+   cd <your_repository>
+   npm install
+   ```
+
+3. Build the project:
+   ```bash
+   npm run build
+   ```
+
+4. Start the project:
+   ```bash
+   npm run start
+   ```
+
+## Usage
+
+1. Access the SvelteKit web interface at `http://localhost:5000`.
+
+2. Use the interface to manage PM2 processes on your servers.
+
+## Contributions
+
+Contributions are welcome. Please follow these steps to contribute:
+
+1. Fork the repository.
+
+2. Create a new branch for your feature or bug fix.
+
+3. Submit a pull request, detailing the changes made and their purpose.
+
+Please ensure your code adheres to the project's coding standards and includes tests if applicable.
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
 ```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
