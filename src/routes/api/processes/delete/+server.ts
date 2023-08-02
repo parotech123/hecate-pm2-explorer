@@ -9,7 +9,7 @@ export const POST: RequestHandler = async ({request }) => {
 
 	const { id } = await body
 
-	console.log(id);
+	// console.log(id);
 
 	if (typeof id ==="undefined") return new Response('No ID provided', { status: 400 })
 

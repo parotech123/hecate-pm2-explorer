@@ -34,7 +34,7 @@ export function CrudStore<T extends Id>() {
 		}),
 		remove: (removeVal: T | T[] | string | string[]) => update(array => {
 
-			console.log('removeVal', removeVal)
+			// console.log('removeVal', removeVal)
 			//@ts-ignore
 			if (!removeVal || !array || (removeVal.length && removeVal.length == 0)) return (array ?? [])
 
@@ -53,7 +53,7 @@ export function CrudStore<T extends Id>() {
 				idsToRemove = (typeof removeVal == "string") ? [removeVal] : [removeVal.pid]
 			}
 
-			console.log('idsToRemove', idsToRemove)
+			// console.log('idsToRemove', idsToRemove)
 
 			array = [...array.filter(a => !idsToRemove.includes(a.pid.toString())),]
 

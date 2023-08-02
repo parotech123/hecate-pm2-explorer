@@ -1,8 +1,8 @@
 import { writable } from "svelte/store";
 
-export const errorsStore = writable<string[] | {
+export const mixLogsStore = writable<string[] | {
 	message: string;
-	timestamp: string;
+	timestamp: Date;
 	app_name: string;
 	type: string;
 	process_id: number

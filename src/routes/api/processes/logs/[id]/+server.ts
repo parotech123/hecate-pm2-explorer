@@ -10,9 +10,12 @@ export const GET: RequestHandler = async ({ params }) => {
 
 	await pm2.connect();
 
-	const outLogs = await pm2.retrieveLastLines(id, 10, 'out');
+	let outLogs = await pm2.retrieveLastLines(id, 10, 'out');
 	const errLogs = await pm2.retrieveLastLines(id, 10, 'err');
 
+
+
+	// console.log(outLogs[0])
 	pm2.disconnect();
 	return new Response(JSON.stringify({
 		outLogs,

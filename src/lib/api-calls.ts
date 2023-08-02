@@ -2,25 +2,35 @@ import type { ProcessData } from "./PM2Wrapper";
 import { processesStore } from './process.store';
 import { logsStore } from './logs.store';
 import { errorsStore } from "./errors.store";
+import { mixLogsStore } from "./mix-logs.store";
+import orderBy from 'lodash-es/orderBy';
+import { parse } from "date-fns";
+import { sleep } from "./utils";
 
 export async function updateProcesses() {
-	const res = await fetch('/api/processes');
-	const data = await res.json();
-	console.log(data);
-	processesStore.replace(data);
+    const res = await fetch('/api/processes');
+    const data = await res.json();
+    processesStore.reset();
+    processesStore.replace(data);
+    console.log(data);
+    
 }
 
 export async function deleteProcess(p: ProcessData) {
-    await fetch(`/api/processes/delete`, {
+    let result = await fetch(`/api/processes/delete`, {
         method: 'POST',
         body: JSON.stringify({
-            pid:p.pid
+            id: p.pm_id
         }),
         headers: {
             'Content-Type': 'application/json',
         }
 
     });
+
+    console.log(result);
+    // await sleep(1000)
+
     await updateProcesses();
 }
 
@@ -41,15 +51,15 @@ export async function loadProcessesFromStorage() {
 };
 
 
-export async function fetchProcesses(subnet:string) {
+export async function fetchProcesses(subnet: string) {
     const res = await fetch(`/api/remoteProcesses?subnet=${subnet}`);
     const data = await res.json();
     localStorage.setItem('processes', JSON.stringify(data.allProcesses));
-	processesStore.replace(data.allProcesses);
+    processesStore.replace(data.allProcesses);
 };
 
 
-export async function flushLogs(p:ProcessData) {
+export async function flushLogs(p: ProcessData) {
     const res = await fetch(`/api/processes/logs/${p.name}/flush`, {
         method: 'POST',
         headers: {
@@ -65,10 +75,47 @@ export async function flushLogs(p:ProcessData) {
 }
 
 
-export async function fetchLogs(p:ProcessData) {
+export async function fetchLogs(p: ProcessData) {
     const res = await fetch(`/api/processes/logs/${p.name}`);
     const data = await res.json();
-    console.log(data);
-    logsStore.set(data.outLogs.split('\n'));
-    errorsStore.set(data.errLogs.split('\n'));
+
+    let logs = data.outLogs.split('\n').map((l: any) => {
+
+        try {
+            let log = JSON.parse(l.replace("\n", ""))
+
+            log.timestamp = parse(log.timestamp.split(" ")[0] + " " + log.timestamp.split(" ")[1], 'yyyy-MM-dd HH:mm', new Date());
+            return log
+        } catch (error) {
+
+            console.log(l)
+            return
+        }
+    })
+        .filter((l: any) => Boolean(l))
+
+    logsStore.set(logs);
+
+
+    let errors = data.errLogs.split('\n').map((l: any) => {
+        try {
+            let log = JSON.parse(l.replace("\n", ""))
+
+            log.timestamp = parse(log.timestamp.split(" ")[0] + " " + log.timestamp.split(" ")[1], 'yyyy-MM-dd HH:mm', new Date());
+
+            return log
+        } catch (error) {
+            console.log(l)
+            return
+        }
+
+    })
+        .filter((l: any) => Boolean(l))
+
+    errorsStore.set(errors);
+
+    mixLogsStore.set(orderBy([...logs, ...errors], 'timestamp', 'desc'))
+
+
+
 }

@@ -12,7 +12,7 @@ const TIMEOUT = 100;  // 5 seconds
 
 export const GET: RequestHandler = async ({ request, url }) => {
 	let subnet = url.searchParams.get('subnet') as string;
-	console.log(subnet)
+	// console.log(subnet)
 
 	if (typeof subnet === "undefined") return new Response('No subnet provided', { status: 400 })
 
@@ -21,7 +21,7 @@ export const GET: RequestHandler = async ({ request, url }) => {
 	const ipRange = IpSubnetCalculator.calculateSubnetMask(subnet.split('/')[0], Number(subnet.split('/')[1]));
 	const ips = [];
 
-	console.log(ipRange)
+	// console.log(ipRange)
 
 	for (let i = ipRange.ipLow; i <= ipRange.ipHigh; i++) {
 		ips.push(longToIp(i));

@@ -24,7 +24,13 @@ export function fromMillisecondsToDDHHmmss(ms: number | undefined) {
 	const minutesms = ms % (60 * 1000);
 	const sec = Math.floor((minutesms) / (1000));
 
-	return (days + 'd ' + hours + 'h ' + minutes + 'm ' + sec + 's');
+	let array = [days ? days + 'd' : '',
+	hours ? hours + 'h' : '',
+	minutes ? minutes + 'm' : '',
+	sec ? sec + 's' : ''
+	];
+
+	return array.join('');
 
 
 
@@ -66,4 +72,9 @@ export function pausable(pauser: Observable<boolean>): any {
 			};
 		});
 	};
+}
+
+
+export function sleep(ms: number) {
+	return new Promise(resolve => setTimeout(resolve, ms));
 }
