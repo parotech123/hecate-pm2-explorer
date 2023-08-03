@@ -1,4 +1,3 @@
-```markdown
 # PM2 API Wrapper with SvelteKit Interface
 
 This project provides a TypeScript API Wrapper to interact with a PM2 instance and a SvelteKit interface to manage PM2 processes.
@@ -12,23 +11,23 @@ The project allows you to control PM2 processes on local and remote servers thro
 Follow the steps below to setup the project:
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/<your_username>/<your_repository>.git
+   ```
+   git clone https://github.com/parotech123/hecate-pm2-explorer.git
    ```
 
 2. Install the dependencies:
-   ```bash
-   cd <your_repository>
+   ```
+   cd hecate-pm2-explorer
    npm install
    ```
 
 3. Build the project:
-   ```bash
+   ```
    npm run build
    ```
 
 4. Start the project:
-   ```bash
+   ```
    npm run start
    ```
 
@@ -53,4 +52,3 @@ Please ensure your code adheres to the project's coding standards and includes t
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
-```
