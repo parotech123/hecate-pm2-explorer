@@ -1,22 +1,25 @@
-import type { ProcessData } from "./PM2Wrapper";
-import { processesStore } from './process.store';
-import { logsStore } from './logs.store';
-import { errorsStore } from "./errors.store";
-import { mixLogsStore } from "./mix-logs.store";
-import orderBy from 'lodash-es/orderBy';
 import { parse } from "date-fns";
-import { sleep } from "./utils";
+import orderBy from 'lodash-es/orderBy';
+import type { ProcessData } from "./PM2Wrapper";
+import { errorsStore } from "./errors.store";
+import { loadingStore } from "./loading.store";
+import { logsStore } from './logs.store';
+import { mixLogsStore } from "./mix-logs.store";
+import { processesStore } from './process.store';
 
 export async function updateProcesses() {
+    loadingStore.set(true);
     const res = await fetch('/api/processes');
     const data = await res.json();
     processesStore.reset();
     processesStore.replace(data);
     console.log(data);
-    
+    loadingStore.set(false);
+
 }
 
 export async function deleteProcess(p: ProcessData) {
+    loadingStore.set(true);
     let result = await fetch(`/api/processes/delete`, {
         method: 'POST',
         body: JSON.stringify({
@@ -32,6 +35,7 @@ export async function deleteProcess(p: ProcessData) {
     // await sleep(1000)
 
     await updateProcesses();
+    loadingStore.set(false);
 }
 
 
@@ -52,14 +56,20 @@ export async function loadProcessesFromStorage() {
 
 
 export async function fetchProcesses(subnet: string) {
+    loadingStore.set(true);
     const res = await fetch(`/api/remoteProcesses?subnet=${subnet}`);
     const data = await res.json();
     localStorage.setItem('processes', JSON.stringify(data.allProcesses));
     processesStore.replace(data.allProcesses);
+
+    loadingStore.set(false);
 };
 
 
 export async function flushLogs(p: ProcessData) {
+
+
+    loadingStore.set(true);
     const res = await fetch(`/api/processes/logs/${p.name}/flush`, {
         method: 'POST',
         headers: {
@@ -72,11 +82,20 @@ export async function flushLogs(p: ProcessData) {
     if (res.ok) {
         alert('Logs flushed');
     }
+
+
+    loadingStore.set(false);
+
 }
 
 
-export async function fetchLogs(p: ProcessData) {
-    const res = await fetch(`/api/processes/logs/${p.name}`);
+export async function fetchLogs(p: ProcessData | null, lines?: number) {
+
+    if (!p) return
+
+    loadingStore.set(true);
+
+    const res = await fetch(`/api/processes/logs/${p.name}?lines=${lines || 10}`);
     const data = await res.json();
 
     let logs = data.outLogs.split('\n').map((l: any) => {
@@ -116,6 +135,6 @@ export async function fetchLogs(p: ProcessData) {
 
     mixLogsStore.set(orderBy([...logs, ...errors], 'timestamp', 'desc'))
 
-
+    loadingStore.set(false);
 
 }
