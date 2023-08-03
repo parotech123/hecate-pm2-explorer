@@ -34,7 +34,7 @@ Follow the steps below to setup the project:
 
 ## Usage
 
-1. Access the SvelteKit web interface at `http://localhost:5000`.
+1. Access the SvelteKit web interface at `http://localhost:3000`.
 
 2. Use the interface to manage PM2 processes on your servers.
 
