@@ -208,7 +208,7 @@ const selectedProcess = writable < ProcessData | null > (null);
 
             </td>
             <td class="w-[120px]">
-                {format(line.timestamp, "dd/MM HH:mm")}:
+                {format(line.timestamp, "dd/MM HH:mm:ss.SSS")}:
 
             </td>
             <td class="{line.type=='out' ? 'text-info' : 'text-error'}">
