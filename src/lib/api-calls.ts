@@ -103,7 +103,7 @@ export async function fetchLogs(p: ProcessData | null, lines?: number) {
         try {
             let log = JSON.parse(l.replace("\n", ""))
 
-            log.timestamp = parse(log.timestamp.split(" ")[0] + " " + log.timestamp.split(" ")[1], 'yyyy-MM-dd HH:mm', new Date());
+            log.timestamp = parse(log.timestamp.split(" ")[0] + " " + log.timestamp.split(" ")[1], 'yyyy-MM-dd HH:mm:ss.SSS', new Date());
             return log
         } catch (error) {
 
@@ -120,7 +120,7 @@ export async function fetchLogs(p: ProcessData | null, lines?: number) {
         try {
             let log = JSON.parse(l.replace("\n", ""))
 
-            log.timestamp = parse(log.timestamp.split(" ")[0] + " " + log.timestamp.split(" ")[1], 'yyyy-MM-dd HH:mm', new Date());
+            log.timestamp = parse(log.timestamp.split(" ")[0] + " " + log.timestamp.split(" ")[1], 'yyyy-MM-dd HH:mm:ss.SSS', new Date());
 
             return log
         } catch (error) {
