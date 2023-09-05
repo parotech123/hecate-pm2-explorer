@@ -78,3 +78,20 @@ export function pausable(pauser: Observable<boolean>): any {
 export function sleep(ms: number) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+
+export function calculateDivHeight(divId:string) {
+	const myDiv = document.getElementById(divId);
+
+	if(!myDiv) return;
+	const totalHeight = myDiv.offsetHeight;
+	const contentHeight = myDiv.clientHeight;
+	const actualContentHeight = myDiv.scrollHeight - parseFloat(getComputedStyle(myDiv).paddingTop) - parseFloat(getComputedStyle(myDiv).paddingBottom);
+
+	console.log("Total height:", totalHeight);
+	console.log("Content height:", contentHeight);
+	console.log("Actual content height:", actualContentHeight);
+
+
+	return actualContentHeight+100;
+}

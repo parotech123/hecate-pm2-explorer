@@ -49,8 +49,15 @@ import Badge from '$lib/components/Badge.svelte'
 import {
     loadingStore
 } from '$lib/loading.store'
+	import he from 'date-fns/locale/he'
+
+import {calculateDivHeight} from "$lib/utils"
+	import { browser } from '$app/environment'
+
 
 const pauser$ = new Subject < boolean > ();
+
+const height = writable < number > (0);
 
 // Timer that emits every 1 second (adjust interval as needed)
 const timer$ = interval(1000);
@@ -68,13 +75,22 @@ const status$ = new BehaviorSubject < boolean > (false);
 // );
 onMount(async () => {
         // loadProcessesFromStorage()
-        updateProcesses()
+        await updateProcesses()
 
+ height.set(calculateDivHeight("tableproc") ?? 0)
         //     const subscription = pausableTimer$.subscribe((value) => {
 
     },
 
 );
+
+$:{
+    if(browser){
+
+        height.set(calculateDivHeight("tableproc") ?? 0)
+    }
+}
+
 
 // });
 
@@ -90,15 +106,17 @@ const selectedProcess = writable < ProcessData | null > (null);
 
 <div class="navbar bg-base-100 gap-4">
     <div class="">
-        <span class="text-2xl font-bold">Hecate</span>
+        <span class="text-2xl font-bold">Hecate {$height}</span>
     </div>
     <ButtonLoading color='primary' icon='mdi:refresh' on:click={async()=>{
         await updateProcesses()
+         height.set(calculateDivHeight("tableproc") ?? 0)
         }}>
 
     </ButtonLoading>
     <ButtonLoading color='info' icon='mdi:refresh' on:click={async()=>{
         await updateProcesses()
+         height.set(calculateDivHeight("tableproc") ?? 0)
         }}>
 
     </ButtonLoading>
@@ -114,7 +132,7 @@ const selectedProcess = writable < ProcessData | null > (null);
 <button on:click={async()=>{fetchProcesses}}>Fetch Processes</button> -->
 
 {#if $processesStore && $processesStore.length > 0}
-<table class="table table-zebra m-5" style="">
+<table class="table table-zebra m-5" style=""  id="tableproc">
     <thead>
         <tr>
             <th class="text-accent">ID</th>
@@ -173,7 +191,7 @@ const selectedProcess = writable < ProcessData | null > (null);
 <p>No processes found</p>
 {/if}
 {#if $mixLogsStore}
-<div class="divider flex flex-auto">
+<div class="divider flex flex-auto" >
     {#if $selectedProcess}
     <div>
         {$selectedProcess?.name}
@@ -197,8 +215,8 @@ const selectedProcess = writable < ProcessData | null > (null);
     </ButtonLoading>
     {/if}
 </div>
-<div class="overflow-x-auto h-[400px]">
-    <table  class="table table-zebra table-xs">
+<div class="overflow-x-auto">
+    <table  class="table table-zebra table-xs" style="height: calc(100vh - {$height}px)">
         {#each $mixLogsStore as line}
 
         {#if typeof line === 'object' && line.message}
@@ -207,8 +225,11 @@ const selectedProcess = writable < ProcessData | null > (null);
                 <Icon icon="radix-icons:dot" class="text-2xl" ></Icon>
 
             </td>
-            <td class="w-[120px]">
-                {format(line.timestamp, "dd/MM HH:mm:ss.SSS")}:
+            <td class="w-[150px]">
+                <div>
+
+                    {format(line.timestamp, "dd/MM HH:mm:ss.SSS")}:
+                </div>
 
             </td>
             <td class="{line.type=='out' ? 'text-info' : 'text-error'}">
@@ -223,6 +244,8 @@ const selectedProcess = writable < ProcessData | null > (null);
     </table>
 </div>
 {/if}
+
+
 
 <!-- {#if $errorsStore}
 <ul>
