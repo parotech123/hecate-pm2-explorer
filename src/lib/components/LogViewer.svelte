@@ -92,7 +92,7 @@ export let height
 <div class="overflow-x-auto">
     {#if logs}
 
-<div class="mockup-code mt-10 ml-4 mr-4">
+<!-- <div class="mockup-code mt-10 ml-4 mr-4">
 	{#each logs as line}
 	 {#if typeof line === 'object' && line.message}
 	<pre data-prefix="~"><code>{line.message}</code></pre> 
@@ -101,13 +101,13 @@ export let height
 	<pre data-prefix="~"><code>{line}</code></pre> 
 	{/if}
 	{/each}
-</div>
+</div> -->
 
     <table  class="table table-zebra table-xs w-full" style="height: calc(100vh - {$height}px)">
        {#each logs as line} 
         {#if typeof line === 'object' && line.message}
-        <tr >
-            <td class="w-[10px]">
+        <tr class="max-h-[30px]">
+            <td class="w-[10px] max-h-[30px]">
                 <Icon icon="radix-icons:dot" class="text-2xl" ></Icon>
 
             </td>
