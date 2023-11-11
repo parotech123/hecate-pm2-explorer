@@ -160,7 +160,7 @@ let subnet = '192.168.1.0/24'; // Default value
 
 {#if $processesStore && $processesStore.length > 0}
 
-<div class="flex flex-wrap md:hidden justify-center">
+<div class="flex flex-wrap md:hidden justify-center gap-5">
 
     {#each $processesStore as process}
     <CardProcess {process}></CardProcess>
