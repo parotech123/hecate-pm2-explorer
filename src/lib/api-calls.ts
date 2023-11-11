@@ -1,11 +1,12 @@
 import { parse } from "date-fns";
 import orderBy from 'lodash-es/orderBy';
 import type { ProcessData } from "./PM2Wrapper";
-import { errorsStore } from "./errors.store";
-import { loadingStore } from "./loading.store";
-import { logsStore } from './logs.store';
-import { mixLogsStore } from "./mix-logs.store";
-import { processesStore } from './process.store';
+import { errorsStore } from "./stores/errors.store";
+import { loadingStore } from "./stores/loading.store";
+import { logsStore } from './stores/logs.store';
+import { mixLogsStore } from "./stores/mix-logs.store";
+import { processesStore } from './stores/process.store';
+import { get } from "svelte/store";
 
 export async function updateProcesses() {
     loadingStore.set(true);
@@ -100,6 +101,9 @@ export async function fetchLogs(p: ProcessData | null, lines?: number) {
 
     let logs = data.outLogs.split('\n').map((l: any) => {
 
+
+        
+
         try {
             let log = JSON.parse(l.replace("\n", ""))
 
@@ -108,11 +112,10 @@ export async function fetchLogs(p: ProcessData | null, lines?: number) {
         } catch (error) {
 
             console.log(l)
-            return
+            return l
         }
     })
         .filter((l: any) => Boolean(l))
-
     logsStore.set(logs);
 
 
@@ -135,6 +138,7 @@ export async function fetchLogs(p: ProcessData | null, lines?: number) {
 
     mixLogsStore.set(orderBy([...logs, ...errors], 'timestamp', 'desc'))
 
+    console.log(get(mixLogsStore))
     loadingStore.set(false);
 
 }

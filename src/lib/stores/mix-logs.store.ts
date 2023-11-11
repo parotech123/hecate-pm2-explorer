@@ -7,3 +7,6 @@ export const mixLogsStore = writable<string[] | {
 	type: string;
 	process_id: number
 }[]>([]);
+
+
+export const filterText = writable < string > ('');

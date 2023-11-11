@@ -8,15 +8,7 @@ import {
     loadProcessesFromStorage,
     updateProcesses
 } from '$lib/api-calls'
-import {
-    errorsStore
-} from '$lib/errors.store'
-import {
-    logsStore
-} from '$lib/logs.store'
-import {
-    processesStore
-} from '$lib/process.store'
+
 import {
     fromByteToHuman,
     fromMillisecondsToDDHHmmss,
@@ -34,26 +26,38 @@ import {
 } from 'svelte'
 
 import {
+	filterText,
     mixLogsStore
-} from '$lib/mix-logs.store'
+} from 'src/lib/stores/mix-logs.store'
 import {
     format
 } from 'date-fns'
 import {
+    derived,
     writable
 } from 'svelte/store'
 import type {
     ProcessData
 } from '$lib/PM2Wrapper'
 import Badge from '$lib/components/Badge.svelte'
+
+import he from 'date-fns/locale/he'
+
 import {
-    loadingStore
-} from '$lib/loading.store'
-	import he from 'date-fns/locale/he'
-
-import {calculateDivHeight} from "$lib/utils"
-	import { browser } from '$app/environment'
-
+    calculateDivHeight
+} from "$lib/utils"
+import {
+    browser
+} from '$app/environment'
+import {
+    selectedProcess
+} from 'src/lib/stores/selected-process.store'
+import ButtonLoadingList from 'src/lib/components/ButtonLoadingList.svelte'
+import {
+    processesStore
+} from 'src/lib/stores/process.store'
+import LogViewer from 'src/lib/components/LogViewer.svelte'
+	import CardProcess from 'src/lib/components/CardProcess.svelte'
 
 const pauser$ = new Subject < boolean > ();
 
@@ -77,20 +81,42 @@ onMount(async () => {
         // loadProcessesFromStorage()
         await updateProcesses()
 
- height.set(calculateDivHeight("tableproc") ?? 0)
+        height.set(calculateDivHeight("tableproc") ?? 0)
         //     const subscription = pausableTimer$.subscribe((value) => {
 
     },
 
 );
 
-$:{
-    if(browser){
+$: {
+    if (browser) {
 
         height.set(calculateDivHeight("tableproc") ?? 0)
     }
 }
 
+export const filtered_mixLogsStore = derived(
+    [mixLogsStore, filterText],
+    ([$mixLogsStore, $filterText]) => {
+        if (!$mixLogsStore) return
+
+        if ($filterText == '') return $mixLogsStore
+
+        let toReturn =$mixLogsStore.filter((line) => {
+            if (typeof line === 'object' && line.message) {
+                return line.message.toLowerCase().includes($filterText.toLowerCase())
+            } else if(typeof line === 'string') {
+                
+                return line.toLowerCase().includes($filterText.toLowerCase())
+            }
+        })
+
+        console.log(toReturn)
+        return toReturn
+
+
+    }
+)
 
 // });
 
@@ -100,26 +126,27 @@ const buttonList = [{
 }]
 
 let subnet = '192.168.1.0/24'; // Default value
-
-const selectedProcess = writable < ProcessData | null > (null);
 </script>
 
 <div class="navbar bg-base-100 gap-4">
-    <div class="">
-        <span class="text-2xl font-bold">Hecate {$height}</span>
-    </div>
-    <ButtonLoading color='primary' icon='mdi:refresh' on:click={async()=>{
+    <div class="flex flex-row gap-3 items-center m-auto">
+
+        <div class="m-auto md:text-right">
+            <span class="text-2xl font-bold">Hecate {$height}</span>
+        </div>
+        <ButtonLoading color='primary' icon='mdi:refresh' on:click={async()=>{
+            await updateProcesses()
+            height.set(calculateDivHeight("tableproc") ?? 0)
+        }}>
+
+</ButtonLoading>
+</div>
+    <!-- <ButtonLoading color='info' icon='mdi:refresh' on:click={async()=>{
         await updateProcesses()
          height.set(calculateDivHeight("tableproc") ?? 0)
         }}>
 
-    </ButtonLoading>
-    <ButtonLoading color='info' icon='mdi:refresh' on:click={async()=>{
-        await updateProcesses()
-         height.set(calculateDivHeight("tableproc") ?? 0)
-        }}>
-
-    </ButtonLoading>
+    </ButtonLoading> -->
 
     <!-- <div class="flex-none">
         <button class="btn btn-square btn-ghost">
@@ -132,7 +159,15 @@ const selectedProcess = writable < ProcessData | null > (null);
 <button on:click={async()=>{fetchProcesses}}>Fetch Processes</button> -->
 
 {#if $processesStore && $processesStore.length > 0}
-<table class="table table-zebra m-5" style=""  id="tableproc">
+
+<div class="flex flex-wrap md:hidden justify-center">
+
+    {#each $processesStore as process}
+    <CardProcess {process}></CardProcess>
+    {/each}
+</div>
+
+<table class="table table-zebra m-5 hidden md:block" style=""  id="tableproc" >
     <thead>
         <tr>
             <th class="text-accent">ID</th>
@@ -163,24 +198,7 @@ const selectedProcess = writable < ProcessData | null > (null);
             <td>{process.istances}</td>
             <td>{process.ip}</td>
             <td>
-                <ButtonLoading color='error' icon='solar:trash-bin-trash-broken' on:click={async()=>{
-                    await deleteProcess(process)
-                    selectedProcess.set(process)
-                    }}>
-
-                </ButtonLoading>
-                <ButtonLoading color='info' icon='octicon:log-16' on:click={async()=>{
-                    await fetchLogs(process)
-                    selectedProcess.set(process)
-                    }}>
-
-                </ButtonLoading>
-                <ButtonLoading color='warning' icon='fluent-emoji-high-contrast:toilet' on:click={async()=>{
-                    await flushLogs(process)
-                    selectedProcess.set(process)
-                    }}>
-
-                </ButtonLoading>
+                <ButtonLoadingList {process}></ButtonLoadingList>
 
             </td>
         </tr>
@@ -190,62 +208,8 @@ const selectedProcess = writable < ProcessData | null > (null);
 {:else}
 <p>No processes found</p>
 {/if}
-{#if $mixLogsStore}
-<div class="divider flex flex-auto" >
-    {#if $selectedProcess}
-    <div>
-        {$selectedProcess?.name}
-
-    </div>
-    <Badge process={$selectedProcess}></Badge>
-    <ButtonLoading color='info'  on:click={async()=>{
-        await fetchLogs($selectedProcess, 10)
-        }}>
-        10
-    </ButtonLoading>
-    <ButtonLoading color='info'  on:click={async()=>{
-        await fetchLogs($selectedProcess, 100)
-        }}>
-        100
-    </ButtonLoading>
-    <ButtonLoading color='info'  on:click={async()=>{
-        await fetchLogs($selectedProcess, 500)
-        }}>
-        500
-    </ButtonLoading>
-    {/if}
-</div>
-<div class="overflow-x-auto">
-    <table  class="table table-zebra table-xs" style="height: calc(100vh - {$height}px)">
-        {#each $mixLogsStore as line}
-
-        {#if typeof line === 'object' && line.message}
-        <tr >
-            <td class="w-[10px]">
-                <Icon icon="radix-icons:dot" class="text-2xl" ></Icon>
-
-            </td>
-            <td class="w-[150px]">
-                <div>
-
-                    {format(line.timestamp, "dd/MM HH:mm:ss.SSS")}:
-                </div>
-
-            </td>
-            <td class="{line.type=='out' ? 'text-info' : 'text-error'}">
-                {line.message}
-
-            </td>
-        </tr>
-        {:else}
-        <li class="">{line}</li>
-        {/if}
-        {/each}
-    </table>
-</div>
-{/if}
-
-
+<div class="h-[100px]"></div>
+<LogViewer logs={$filtered_mixLogsStore} height={height}></LogViewer>
 
 <!-- {#if $errorsStore}
 <ul>
@@ -254,3 +218,5 @@ const selectedProcess = writable < ProcessData | null > (null);
     {/each}
 </ul>
 {/if} -->
+
+

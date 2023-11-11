@@ -1,11 +1,10 @@
 <script lang="ts">
-import {
-    loadingStore
-} from "$lib/loading.store"
+
 import Icon from "@iconify/svelte"
 import {
     createEventDispatcher
 } from "svelte"
+	import { loadingStore } from "../stores/loading.store"
 
 export let classes = '';
 export let icon: string = '';
