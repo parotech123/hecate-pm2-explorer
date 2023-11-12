@@ -13,6 +13,7 @@ export const POST: RequestHandler = async ({ params }) => {
 	await pm2.restart(id);
 
 	pm2.disconnect();
+	
 	return new Response(JSON.stringify({
 		message: `Process ${id} has been restarted successfully.`
 	}))

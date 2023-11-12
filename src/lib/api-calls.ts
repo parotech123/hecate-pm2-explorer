@@ -39,6 +39,22 @@ export async function deleteProcess(p: ProcessData) {
     loadingStore.set(false);
 }
 
+export async function restartProcess(p: ProcessData) {
+    loadingStore.set(true);
+    let result = await fetch(`/api/processes/restart/${p.pm_id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+
+    });
+
+    console.log(result);
+    // await sleep(1000)
+
+    await updateProcesses();
+    loadingStore.set(false);
+}
 
 export async function loadProcessesFromStorage() {
     const savedProcesses = localStorage.getItem('processes');
