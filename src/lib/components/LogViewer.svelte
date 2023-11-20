@@ -107,17 +107,17 @@ export let height
                 </div>
 
             </td>
-            <td class="{line.type=='out' ? 'text-info' : 'text-error'} sm:hidden">
+            <td class="{line.type=='out' ? 'text-info' : 'text-error'}">
                 {line.message}
 
             </td>
         </tr>
-        <tr class="md:hidden">
+        <!-- <tr class="md:hidden">
           <td class="{line.type=='out' ? 'text-info' : 'text-error'} md:hidden">
                 {line.message}
 
             </td>  
-        </tr>
+        </tr> -->
         {:else}
         <li class="">{line}</li>
         {/if}
