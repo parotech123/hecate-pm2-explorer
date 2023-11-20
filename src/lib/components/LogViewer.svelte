@@ -7,7 +7,7 @@ import {
     fetchLogs
 } from "../api-calls"
 import {
-	filterText,
+    filterText,
     mixLogsStore
 } from "../stores/mix-logs.store"
 import {
@@ -15,6 +15,7 @@ import {
 } from "../stores/selected-process.store"
 import Badge from "./Badge.svelte"
 import ButtonLoading from "./ButtonLoading.svelte"
+	import { tr } from "date-fns/locale"
 
 export let logs: (string | {
     message: string;
@@ -27,18 +28,18 @@ export let logs: (string | {
 export let height
 </script>
 
-    {#if $selectedProcess}
+{#if $selectedProcess}
 {#if $mixLogsStore}
 <div class="divider  flex-auto hidden md:flex" >
     {#if $selectedProcess}
-	 <div class="flex flex-row gap-4 items-center">
+    <div class="flex flex-row gap-4 items-center">
 
-		 <div>
-			 {$selectedProcess?.name}
-			 
-			</div>
-			<Badge process={$selectedProcess}></Badge>
-		</div>
+        <div>
+            {$selectedProcess?.name}
+
+        </div>
+        <Badge process={$selectedProcess}></Badge>
+    </div>
     <div class="flex flex-row gap-4">
 
         <ButtonLoading color='info'  on:click={async()=>{
@@ -57,18 +58,18 @@ export let height
             500
         </ButtonLoading>
     </div>
-    <input type="text" placeholder="Type here" class="input input-bordered input-primary w-full max-w-xs" />
+    <input type="text" placeholder="Type here" class="input input-bordered input-primary w-full max-w-xs"  bind:value={$filterText}/>
     {/if}
 </div>
 <div class="flex flex-auto gap-3 flex-col md:hidden items-center justify-center" >
-	 <div class="flex flex-row gap-4 items-center">
+    <div class="flex flex-row gap-4 items-center">
 
-		 <div>
-			 {$selectedProcess?.name}
-			 
-			</div>
-			<Badge process={$selectedProcess}></Badge>
-		</div>
+        <div>
+            {$selectedProcess?.name}
+
+        </div>
+        <Badge process={$selectedProcess}></Badge>
+    </div>
     <div class="flex flex-row gap-4">
 
         <ButtonLoading color='info'  on:click={async()=>{
@@ -91,20 +92,8 @@ export let height
 </div>
 <div class="overflow-x-auto">
     {#if logs}
-
-<!-- <div class="mockup-code mt-10 ml-4 mr-4">
-	{#each logs as line}
-	 {#if typeof line === 'object' && line.message}
-	<pre data-prefix="~"><code>{line.message}</code></pre> 
-	 {:else}
-
-	<pre data-prefix="~"><code>{line}</code></pre> 
-	{/if}
-	{/each}
-</div> -->
-
     <table  class="table table-zebra table-xs w-full" style="height: calc(100vh - {$height}px)">
-       {#each logs as line} 
+        {#each logs as line}
         {#if typeof line === 'object' && line.message}
         <tr class="max-h-[30px]">
             <td class="w-[10px] max-h-[30px]">
@@ -118,10 +107,16 @@ export let height
                 </div>
 
             </td>
-            <td class="{line.type=='out' ? 'text-info' : 'text-error'}">
+            <td class="{line.type=='out' ? 'text-info' : 'text-error'} sm:hidden">
                 {line.message}
 
             </td>
+        </tr>
+        <tr class="md:hidden">
+          <td class="{line.type=='out' ? 'text-info' : 'text-error'} md:hidden">
+                {line.message}
+
+            </td>  
         </tr>
         {:else}
         <li class="">{line}</li>
@@ -132,4 +127,4 @@ export let height
 </div>
 {/if}
 
-    {/if}
+{/if}

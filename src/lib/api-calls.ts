@@ -7,6 +7,8 @@ import { logsStore } from './stores/logs.store';
 import { mixLogsStore } from "./stores/mix-logs.store";
 import { processesStore } from './stores/process.store';
 import { get } from "svelte/store";
+import { splitterStore } from "./stores/splitter.store";
+import { filter } from 'rxjs/operators';
 
 export async function updateProcesses() {
     loadingStore.set(true);
@@ -118,12 +120,18 @@ export async function fetchLogs(p: ProcessData | null, lines?: number) {
     let logs = data.outLogs.split('\n').map((l: any) => {
 
 
-        
+
 
         try {
             let log = JSON.parse(l.replace("\n", ""))
 
             log.timestamp = parse(log.timestamp.split(" ")[0] + " " + log.timestamp.split(" ")[1], 'dd/MM HH:mm:ss.SSS', new Date());
+
+
+            let splitted = log.message.split(get(splitterStore))
+
+            log.message = splitted.filter((l: string, i: number) => i > 0).join(get(splitterStore))
+
             return log
         } catch (error) {
 
