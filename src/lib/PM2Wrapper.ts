@@ -74,6 +74,8 @@ export class PM2Wrapper {
         });
     }
 
+ 
+
     // Restart a process
     async restart(process: string | number): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -113,7 +115,7 @@ export class PM2Wrapper {
     }
 
     // Describe a process
-    private async describe(process: string | number): Promise<ProcessDescription> {
+     async describe(process: string | number): Promise<ProcessDescription> {
         return new Promise((resolve, reject) => {
             pm2.describe(process, (err, processDescriptionList) => {
                 if (err) {

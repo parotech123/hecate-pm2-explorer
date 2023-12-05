@@ -26,7 +26,7 @@ import {
 } from 'svelte'
 
 import {
-	filterText,
+    filterText,
     mixLogsStore
 } from 'src/lib/stores/mix-logs.store'
 import {
@@ -57,7 +57,7 @@ import {
     processesStore
 } from 'src/lib/stores/process.store'
 import LogViewer from 'src/lib/components/LogViewer.svelte'
-	import CardProcess from 'src/lib/components/CardProcess.svelte'
+import CardProcess from 'src/lib/components/CardProcess.svelte'
 
 const pauser$ = new Subject < boolean > ();
 
@@ -102,18 +102,17 @@ export const filtered_mixLogsStore = derived(
 
         if ($filterText == '') return $mixLogsStore
 
-        let toReturn =$mixLogsStore.filter((line) => {
+        let toReturn = $mixLogsStore.filter((line) => {
             if (typeof line === 'object' && line.message) {
                 return line.message.toLowerCase().includes($filterText.toLowerCase())
-            } else if(typeof line === 'string') {
-                
+            } else if (typeof line === 'string') {
+
                 return line.toLowerCase().includes($filterText.toLowerCase())
             }
         })
 
         console.log(toReturn)
         return toReturn
-
 
     }
 )
@@ -132,15 +131,15 @@ let subnet = '192.168.1.0/24'; // Default value
     <div class="flex flex-row gap-3 items-center m-auto">
 
         <div class="m-auto md:text-right">
-            <span class="text-2xl font-bold">Hecate {$height}</span>
+            <span class="text-2xl font-bold">Hecate</span>
         </div>
         <ButtonLoading color='primary' icon='mdi:refresh' on:click={async()=>{
             await updateProcesses()
             height.set(calculateDivHeight("tableproc") ?? 0)
-        }}>
+            }}>
 
-</ButtonLoading>
-</div>
+        </ButtonLoading>
+    </div>
     <!-- <ButtonLoading color='info' icon='mdi:refresh' on:click={async()=>{
         await updateProcesses()
          height.set(calculateDivHeight("tableproc") ?? 0)
@@ -166,45 +165,48 @@ let subnet = '192.168.1.0/24'; // Default value
     <CardProcess {process}></CardProcess>
     {/each}
 </div>
+<div class="text-center">
 
-<table class="table table-zebra m-5 hidden md:block" style=""  id="tableproc" >
-    <thead>
-        <tr>
-            <th class="text-accent">ID</th>
-            <th class="text-accent">Process Name</th>
-            <th  class="text-accent">PID</th>
-            <th class="text-accent">Status</th>
-            <th class="text-accent">Uptime</th>
-            <th class="text-accent">Memory</th>
-            <th class="text-accent">CPU</th>
-            <th class="text-accent">Istances</th>
-            <th class="text-accent">IP</th>
-            <th class="text-accent">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {#each $processesStore as process}
-        <tr>
-            <td>{process.pm_id}</td>
-            <td class="text-secondary font-semibold">{process.name}</td>
-            <td>{process.pid}</td>
-            <td>
-                <Badge {process}></Badge>
+    <table class="table table-zebra hidden md:block m-auto " style=""  id="tableproc" >
+        <thead>
+            <tr>
+                <th class="text-accent">ID</th>
+                <th class="text-accent">Process Name</th>
+                <th  class="text-accent">PID</th>
+                <th class="text-accent">Status</th>
+                <th class="text-accent">Uptime</th>
+                <th class="text-accent">Memory</th>
+                <th class="text-accent">CPU</th>
+                <th class="text-accent">Istances</th>
+                <th class="text-accent">IP</th>
+                <th class="text-accent">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each $processesStore as process}
+            <tr>
+                <td>{process.pm_id}</td>
+                <td class="text-secondary font-semibold">{process.name}</td>
+                <td>{process.pid}</td>
+                <td>
+                    <Badge {process}></Badge>
 
-            </td>
-            <td>{fromMillisecondsToDDHHmmss(process.uptime)}</td>
-            <td>{fromByteToHuman(Number(process.memory))}</td>
-            <td>{process.cpu}%</td>
-            <td>{process.istances}</td>
-            <td>{process.ip}</td>
-            <td>
-                <ButtonLoadingList {process}></ButtonLoadingList>
+                </td>
+                <td>{fromMillisecondsToDDHHmmss(process.uptime)}</td>
+                <td>{fromByteToHuman(Number(process.memory))}</td>
+                <td>{process.cpu}%</td>
+                <td>{process.istances}</td>
+                <td>{process.ip}</td>
+                <td>
+                    <ButtonLoadingList {process}></ButtonLoadingList>
 
-            </td>
-        </tr>
-        {/each}
-    </tbody>
-</table>
+                </td>
+            </tr>
+            {/each}
+        </tbody>
+    </table>
+
+</div>
 {:else}
 <p>No processes found</p>
 {/if}
@@ -218,5 +220,3 @@ let subnet = '192.168.1.0/24'; // Default value
     {/each}
 </ul>
 {/if} -->
-
-

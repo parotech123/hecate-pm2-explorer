@@ -58,6 +58,40 @@ export async function restartProcess(p: ProcessData) {
     loadingStore.set(false);
 }
 
+export async function stopProcess(p: ProcessData) {
+    loadingStore.set(true);
+    let result = await fetch(`/api/processes/stop/${p.pm_id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+
+    });
+
+    console.log(result);
+    // await sleep(1000)
+
+    await updateProcesses();
+    loadingStore.set(false);
+}
+
+export async function describeProcess(p: ProcessData) {
+    loadingStore.set(true);
+    let result = await fetch(`/api/processes/describe/${p.pm_id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+
+    });
+
+    console.log(result);
+    // await sleep(1000)
+
+    await updateProcesses();
+    loadingStore.set(false);
+}
+
 export async function loadProcessesFromStorage() {
     const savedProcesses = localStorage.getItem('processes');
 
@@ -117,7 +151,12 @@ export async function fetchLogs(p: ProcessData | null, lines?: number) {
     const res = await fetch(`/api/processes/logs/${p.name}?lines=${lines || 10}`);
     const data = await res.json();
 
-    let logs = data.outLogs.split('\n').map((l: any) => {
+console.log(data)
+
+let work = JSON.parse(data.outLogs)
+
+debugger
+    let logs = work.split('\n').map((l: any) => {
 
 
 

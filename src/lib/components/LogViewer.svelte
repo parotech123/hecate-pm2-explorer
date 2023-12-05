@@ -15,7 +15,9 @@ import {
 } from "../stores/selected-process.store"
 import Badge from "./Badge.svelte"
 import ButtonLoading from "./ButtonLoading.svelte"
-	import { tr } from "date-fns/locale"
+import {
+    tr
+} from "date-fns/locale"
 
 export let logs: (string | {
     message: string;
@@ -92,10 +94,10 @@ export let height
 </div>
 <div class="overflow-x-auto">
     {#if logs}
-    <table  class="table table-zebra table-xs w-full" style="height: calc(100vh - {$height}px)">
+    <table  class="table table-zebra mt-2 table-xs w-full" style="max-height: calc(100vh - {$height}px)">
         {#each logs as line}
-        {#if typeof line === 'object' && line.message}
-        <tr class="max-h-[30px]">
+        {#if typeof line === 'object' && typeof line.message !== 'undefined'}
+        <tr class="!max-h-[30px]">
             <td class="w-[10px] max-h-[30px]">
                 <Icon icon="radix-icons:dot" class="text-2xl" ></Icon>
 
