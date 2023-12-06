@@ -151,13 +151,11 @@ export async function fetchLogs(p: ProcessData | null, lines?: number) {
     const res = await fetch(`/api/processes/logs/${p.name}?lines=${lines || 10}`);
     const data = await res.json();
 
-console.log(data)
+    console.log(data)
 
-let work = JSON.parse(data.outLogs)
+    // let work = JSON.parse(data.outLogs)
 
-debugger
-    let logs = work.split('\n').map((l: any) => {
-
+    let logs = data.outLogs.split('\n').map((l: any) => {
 
 
 
@@ -168,8 +166,13 @@ debugger
 
 
             let splitted = log.message.split(get(splitterStore))
+            debugger
+            log.message = splitted.filter((l: string, i: number) => {
 
-            log.message = splitted.filter((l: string, i: number) => i > 0).join(get(splitterStore))
+                return splitted.length > 1 ? i > 0 : true
+
+            }).join(get(splitterStore))
+            console.log(log)
 
             return log
         } catch (error) {
