@@ -98,3 +98,14 @@ export function calculateDivHeight(divId:string) {
 
 	return actualContentHeight+100;
 }
+
+
+export const ToExludeMonitorKeys = [
+		"Active handles",
+		"Active requests",
+		"Event Loop Latency p95",
+		"Event Loop Latency",
+		"Heap Size",
+		"Heap Usage",
+		"Used Heap Size"
+	]

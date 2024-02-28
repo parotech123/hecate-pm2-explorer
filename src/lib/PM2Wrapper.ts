@@ -27,7 +27,9 @@ export interface ProcessData {
     execInterpreteur?: string;
     execPath?: string;
     createdAt?: number;
+    monitor:{[keyof: string]: any}
 }
+
 
 export class PM2Wrapper {
     // Connect to PM2
@@ -170,6 +172,7 @@ export class PM2Wrapper {
                         execInterpreteur: procDesc.pm2_env.exec_interpreter,
                         execPath: procDesc.pm2_env.pm_exec_path,
                         createdAt: procDesc.pm2_env.created_at,
+                        monitor:procDesc.pm2_env.axm_monitor,
 
                     };
 
