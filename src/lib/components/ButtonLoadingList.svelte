@@ -1,63 +1,92 @@
 <script lang="ts">
-import type {
-    ProcessData
-} from "../PM2Wrapper"
-import {
-    deleteProcess,
-    describeProcess,
-    fetchLogs,
-    flushLogs,
+	import type { ProcessData } from '../PM2Wrapper'
+	import {
+		deleteProcess,
+		fetchLogs,
+		flushLogs,
+		restartProcess,
+		stopProcess
+	} from '../api-calls.svelte'
 
-    restartProcess,
+	import { processes } from '$lib/api-calls.svelte'
 
-	stopProcess
+	import { dialogOpenState } from '../stores/drawer.state.svelte'
+	import ButtonLoading from './ButtonLoading.svelte'
+	import LogViewer from './LogViewer.svelte'
 
+	let {
+		process,
+	}: {
+		process: ProcessData
+	} = $props()
 
-} from "../api-calls"
-import {
-    selectedProcess
-} from "../stores/selected-process.store"
-import ButtonLoading from "./ButtonLoading.svelte"
+	let buttonList = $derived.by(() => {
+		let list:{
+			color: string
+			icon: string
+			cmd: () => void
+		}[] = [
+			
+		]
 
-export let process: ProcessData
+		if (process.status == 'online' || process.status == 'stopping') {
+			list.push({
+				color: 'warning',
+				icon: 'ic:round-pause',
+				cmd: async () => {
+					await stopProcess(process)
+					processes.selected = process
+				},
+			})
+		}
+
+		list.push(
+			{
+				color: process.status == 'online' ? 'primary' : 'success',
+				icon:
+					process.status == 'online'
+						? 'solar:restart-bold'
+						: 'solar:play-bold',
+				cmd: async () => {
+					await restartProcess(process)
+					processes.selected = process
+				},
+			},
+
+			{
+				color: 'info',
+				icon: 'octicon:log-16',
+				cmd: async () => {
+					await fetchLogs(process)
+					processes.selected = process
+					dialogOpenState.dialogOpen = true
+					dialogOpenState.componentToRender = LogViewer
+				},
+			},
+			{
+				color: 'neutral-content',
+				icon: 'fluent-emoji-high-contrast:toilet',
+				cmd: async () => {
+					await flushLogs(process)
+					processes.selected = process
+				},
+			},
+			{
+				color: 'error',
+				icon: 'solar:trash-bin-trash-broken',
+				cmd: async () => {
+					await deleteProcess(process)
+					processes.selected = process
+				},
+			},
+		)
+
+		return list.filter(Boolean)
+	})
 </script>
 
 <div class="flex flex-auto gap-5">
- <!-- <ButtonLoading color='warning' icon='ic:round-pause' on:click={async()=>{
-        await describeProcess(process)
-        selectedProcess.set(process)
-        }}></ButtonLoading> -->
-    {#if process.status=="online"}
-    <ButtonLoading color='warning' icon='ic:round-pause' on:click={async()=>{
-        await stopProcess(process)
-        selectedProcess.set(process)
-        }}></ButtonLoading>
-
-        {/if}
-
-        <ButtonLoading color={process.status=="online"?'primary' :'success' } icon={process.status=="online"?'solar:restart-bold' :'solar:play-bold' } on:click={async()=>{
-            await restartProcess(process)
-            selectedProcess.set(process)
-            }}>
-
-        </ButtonLoading>
-        <ButtonLoading color='info' icon='octicon:log-16' on:click={async()=>{
-            await fetchLogs(process)
-            selectedProcess.set(process)
-            }}>
-
-        </ButtonLoading>
-        <ButtonLoading color='neutral-content' icon='fluent-emoji-high-contrast:toilet' on:click={async()=>{
-            await flushLogs(process)
-            selectedProcess.set(process)
-            }}>
-
-        </ButtonLoading>
-        <ButtonLoading color='error' icon='solar:trash-bin-trash-broken' on:click={async()=>{
-            await deleteProcess(process)
-            selectedProcess.set(process)
-            }}>
-
-        </ButtonLoading>
-
-        </div>
+	{#each buttonList as button}
+		<ButtonLoading {...button}></ButtonLoading>
+	{/each}
+</div>

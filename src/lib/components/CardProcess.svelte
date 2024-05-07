@@ -1,17 +1,17 @@
 <script lang="ts">
+	import { settingsStore } from '../stores/settings.state.svelte'
 	import {
-		fromMillisecondsToDDHHmmss,
+		ToExludeMonitorKeys,
 		fromByteToHuman,
-		ToExludeMonitorKeys
-	} from "../utils.js"
-	import type { ProcessData } from "./../PM2Wrapper.ts"
-	import Badge from "./Badge.svelte"
-	import ButtonLoadingList from "./ButtonLoadingList.svelte"
-
+		fromMillisecondsToDDHHmmss,
+	} from '../utils.js'
+	import type { ProcessData } from './../PM2Wrapper.ts'
+	import Badge from './Badge.svelte'
+	import ButtonLoadingList from './ButtonLoadingList.svelte'
 	export let process: ProcessData
 </script>
 
-<div class="card w-96 bg-base-100 shadow-xl">
+<div class="card w-96 bg-neutral shadow-xl">
 	<div class="card-body !p-2">
 		<h2 class="card-title mb-1 flex flex-row items-center justify-center">
 			<div>
@@ -33,18 +33,23 @@
 			</div>
 			<div class="text-center">{process.cpu}%</div>
 		</div>
-		<div class="grid grid-cols-2 gap-2 items-center m-auto">
-			{#if process.monitor}
-				{#each Object.entries(process?.monitor)
-					.filter(([key, value]) => !ToExludeMonitorKeys.includes(key) && value.value !== undefined)
-					.map(([key, value]) => {
-						return { key, value: value.value }
-					}) as metric}
-					<div class="text-xs italic text-left">{metric.key}:</div>
-					<div class="text-left">{metric.value}</div>
-				{/each}
-			{/if}
-		</div>
+
+		{#if $settingsStore.showMetrics}
+			<div class="grid grid-cols-2 gap-2 items-center m-auto">
+				{#if process.monitor}
+					{#each Object.entries(process?.monitor)
+						.filter(([key, value]) => !ToExludeMonitorKeys.includes(key) && value.value !== undefined)
+						.map(([key, value]) => {
+							return { key, value: value.value }
+						}) as metric}
+						<div class="text-xs italic text-left">
+							{metric.key}:
+						</div>
+						<div class="text-left">{metric.value}</div>
+					{/each}
+				{/if}
+			</div>
+		{/if}
 		<div class="card-actions justify-end m-auto !mt-1 !mb-1">
 			<ButtonLoadingList {process}></ButtonLoadingList>
 		</div>

@@ -28,6 +28,12 @@ export interface ProcessData {
     execPath?: string;
     createdAt?: number;
     monitor:{[keyof: string]: any}
+
+}
+
+export interface ChartHistory {
+    name:string,
+    cpus: number[],
 }
 
 

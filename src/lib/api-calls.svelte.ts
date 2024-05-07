@@ -1,28 +1,55 @@
 import { parse } from "date-fns";
 import orderBy from 'lodash-es/orderBy';
-import type { ProcessData } from "./PM2Wrapper";
-import { errorsStore } from "./stores/errors.store";
-import { loadingStore } from "./stores/loading.store";
-import { logsStore } from './stores/logs.store';
-import { mixLogsStore } from "./stores/mix-logs.store";
-import { processesStore } from './stores/process.store';
 import { get } from "svelte/store";
+import type { ProcessData } from "./PM2Wrapper";
+import { chartDataStore } from "./stores/chart-data.svelte";
+import { CrudState } from "./stores/crud.state.svelte";
+import { errorsStore } from "./stores/errors.store";
+import { logsStore } from './stores/logs.store';
 import { splitterStore } from "./stores/splitter.store";
-import { filter } from 'rxjs/operators';
+import {Logging} from "./stores/logs.state.svelte";
+
+
+export let logging = new Logging();
+
+export let processes = new CrudState<ProcessData>('name');
 
 export async function updateProcesses() {
-    loadingStore.set(true);
+
+    processes.loading = true
     const res = await fetch('/api/processes');
-    const data = await res.json();
-    processesStore.reset();
-    processesStore.replace(data);
-    console.log(data);
-    loadingStore.set(false);
+    const data: ProcessData[] = await res.json();
+
+    processes.reset()
+    processes.data = data
+
+
+
+    data.forEach(element => {
+        let history = chartDataStore.find((c) => c.name === element.name)
+
+        if (!history) {
+
+            history = {
+                name: element.name,
+                cpus: []
+            }
+
+            chartDataStore.push(history)
+
+        }
+
+        history.cpus.push(element.cpu == 0 ? 0.01 : element.cpu)
+    });
+
+    console.log(chartDataStore);
+
+    processes.loading = false
 
 }
 
 export async function deleteProcess(p: ProcessData) {
-    loadingStore.set(true);
+    processes.loading = true
     let result = await fetch(`/api/processes/delete`, {
         method: 'POST',
         body: JSON.stringify({
@@ -38,11 +65,11 @@ export async function deleteProcess(p: ProcessData) {
     // await sleep(1000)
 
     await updateProcesses();
-    loadingStore.set(false);
+    processes.loading = false
 }
 
 export async function restartProcess(p: ProcessData) {
-    loadingStore.set(true);
+    processes.loading = true
     let result = await fetch(`/api/processes/restart/${p.pm_id}`, {
         method: 'POST',
         headers: {
@@ -55,11 +82,11 @@ export async function restartProcess(p: ProcessData) {
     // await sleep(1000)
 
     await updateProcesses();
-    loadingStore.set(false);
+    processes.loading = false
 }
 
 export async function stopProcess(p: ProcessData) {
-    loadingStore.set(true);
+    processes.loading = true
     let result = await fetch(`/api/processes/stop/${p.pm_id}`, {
         method: 'POST',
         headers: {
@@ -72,11 +99,11 @@ export async function stopProcess(p: ProcessData) {
     // await sleep(1000)
 
     await updateProcesses();
-    loadingStore.set(false);
+    processes.loading = false
 }
 
 export async function describeProcess(p: ProcessData) {
-    loadingStore.set(true);
+    processes.loading = true
     let result = await fetch(`/api/processes/describe/${p.pm_id}`, {
         method: 'POST',
         headers: {
@@ -89,7 +116,7 @@ export async function describeProcess(p: ProcessData) {
     // await sleep(1000)
 
     await updateProcesses();
-    loadingStore.set(false);
+    processes.loading = false
 }
 
 export async function loadProcessesFromStorage() {
@@ -102,27 +129,27 @@ export async function loadProcessesFromStorage() {
             const res = await fetch(`/api/processes/${ipInfo.ip}`);
             const data = await res.json();
 
-            processesStore.replace(data);
+            processes.data = data
         }
     }
 };
 
 
 export async function fetchProcesses(subnet: string) {
-    loadingStore.set(true);
+    processes.loading = true
     const res = await fetch(`/api/remoteProcesses?subnet=${subnet}`);
     const data = await res.json();
     localStorage.setItem('processes', JSON.stringify(data.allProcesses));
-    processesStore.replace(data.allProcesses);
+    processes.data = data.allProcesses
 
-    loadingStore.set(false);
+    processes.loading = false
 };
 
 
 export async function flushLogs(p: ProcessData) {
 
 
-    loadingStore.set(true);
+    processes.loading = true
     const res = await fetch(`/api/processes/logs/${p.name}/flush`, {
         method: 'POST',
         headers: {
@@ -137,7 +164,7 @@ export async function flushLogs(p: ProcessData) {
     }
 
 
-    loadingStore.set(false);
+    processes.loading = false
 
 }
 
@@ -146,7 +173,7 @@ export async function fetchLogs(p: ProcessData | null, lines?: number) {
 
     if (!p) return
 
-    loadingStore.set(true);
+    processes.loading = true
 
     const res = await fetch(`/api/processes/logs/${p.name}?lines=${lines || 10}`);
     const data = await res.json();
@@ -166,7 +193,7 @@ export async function fetchLogs(p: ProcessData | null, lines?: number) {
 
 
             let splitted = log.message.split(get(splitterStore))
-            debugger
+
             log.message = splitted.filter((l: string, i: number) => {
 
                 return splitted.length > 1 ? i > 0 : true
@@ -202,9 +229,9 @@ export async function fetchLogs(p: ProcessData | null, lines?: number) {
 
     errorsStore.set(errors);
 
-    mixLogsStore.set(orderBy([...logs, ...errors], 'timestamp', 'desc'))
+    logging.logs = orderBy([...logs, ...errors], 'timestamp', 'desc')
 
-    console.log(get(mixLogsStore))
-    loadingStore.set(false);
+    console.log(logging.logs)
+    processes.loading = false
 
 }
