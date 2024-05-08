@@ -9,12 +9,14 @@
 		cmd,
 		applyLoading=true,
 		classes="",
+		text="",
 	}: {
         icon: string
 		color: string
 		cmd: () => void
 		applyLoading?: boolean
-		classes?: string
+		classes?: string,
+		text?: string
 	} = $props()
 </script>
 
@@ -26,5 +28,6 @@
 		<span class=" loading loading-spinner loading-xs text-{color}"></span>
 	{:else}
 		<Icon {icon} class="text-base"></Icon>
+		{text}
 	{/if}
 </button>

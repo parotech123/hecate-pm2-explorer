@@ -139,4 +139,4 @@
 	<p>No processes found</p>
 {/if}
 <div class="h-[100px]"></div>
-<LogViewer></LogViewer>
+
