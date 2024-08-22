@@ -45,9 +45,9 @@ export default defineConfig({
 	preview: {
 		host: "0.0.0.0",
 		port: 3001,
-		https: {
-			cert: fs.readFileSync("me.king-rudd.ts.net.crt"),
-			key: fs.readFileSync("me.king-rudd.ts.net.key")
-		}
+		// https: {
+		// 	cert: fs.readFileSync("me.king-rudd.ts.net.crt"),
+		// 	key: fs.readFileSync("me.king-rudd.ts.net.key")
+		// }
 	}
 });
