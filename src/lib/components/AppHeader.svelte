@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { updateProcesses } from '../api-calls.svelte'
-	import ButtonLoading from './ButtonLoading.svelte'
-	import { pauseBS$, settingsStore } from '../stores/settings.state.svelte'
-	import { filter, timer } from 'rxjs'
+	import { processInfos, updateProcesses } from "../api-calls.svelte"
+	import ButtonLoading from "./ButtonLoading.svelte"
+	import { pauseBS$, settingsStore } from "../stores/settings.state.svelte"
+	import { filter, timer } from "rxjs"
 
 	let dialog: any
 
@@ -11,25 +11,23 @@
 	let list = $derived.by(() => {
 		return [
 			{
-				color: 'primary',
-				icon: 'mdi:refresh',
+				color: "primary",
+				icon: "mdi:refresh",
 				cmd: async () => {
 					await updateProcesses()
 				},
 			},
 			{
-				color: 'accent',
-				icon: !pause
-					? 'mdi:pause'
-					: 'mdi:play',
+				color: "accent",
+				icon: !pause ? "mdi:pause" : "mdi:play",
 				applyLoading: false,
 				cmd: async () => {
 					pauseBS$.next(!pauseBS$.value)
 				},
 			},
 			{
-				color: 'info',
-				icon: 'mdi:cog',
+				color: "info",
+				icon: "mdi:cog",
 				applyLoading: false,
 				cmd: async () => {
 					dialog.showModal()
@@ -42,9 +40,8 @@
 	$effect(() => {
 		const timer$ = timer(1000, 1000)
 			.pipe(filter((_) => !pauseBS$.value))
-			
-			.subscribe((_) => {
 
+			.subscribe((_) => {
 				if (currentIndex == $settingsStore.refreshTimerSeconds) {
 					currentIndex = 0
 					updateProcesses()
@@ -58,21 +55,26 @@
 		}
 	})
 
-$effect(() => {
+	$effect(() => {
+		pauseBS$.subscribe((value) => {
+			$settingsStore.pause = value
+			pause = value
+			if (value) {
+				currentIndex = 0
+			}
+		})
 
-	pauseBS$.subscribe((value) => {
-		$settingsStore.pause = value
-		pause = value
-		if (value) {
-			currentIndex = 0
+		return () => {
+			pauseBS$.unsubscribe()
 		}
 	})
 
-	return () => {
-		pauseBS$.unsubscribe()
+	function showAll() {
+		if(!processInfos.data) return
+		processInfos.data.forEach((p) => {
+			p.show = true
+		})
 	}
-})
-
 </script>
 
 <div class="navbar bg-base-100 gap-4 sticky top-0 z-50">
@@ -84,9 +86,11 @@ $effect(() => {
 			<ButtonLoading {...item}></ButtonLoading>
 		{/each}
 		{#if !pause}
-
 			<span class="countdown">
-				<span style="--value:{$settingsStore.refreshTimerSeconds-currentIndex};"></span>
+				<span
+					style="--value:{$settingsStore.refreshTimerSeconds -
+						currentIndex};"
+				></span>
 			</span>
 		{/if}
 	</div>
@@ -117,6 +121,7 @@ $effect(() => {
 					class="checkbox checkbox-success"
 				/>
 			</label>
+			<button class="btn btn-accent mt-5" on:click={showAll}>Show All</button>
 		</div>
 	</div>
 </dialog>

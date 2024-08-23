@@ -22,7 +22,8 @@ export default defineConfig({
 				name: 'Hecate',
 				short_name: 'Hecate',
 				description: 'Hecate PM2 Monitor',
-				theme_color: '#ffffff',
+				theme_color: '#0f172a',
+				background_color: '#0f172a',
 				start_url: '/',
 				scope: '/',
 				icons: [

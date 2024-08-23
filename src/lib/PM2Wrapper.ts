@@ -27,12 +27,13 @@ export interface ProcessData {
     execInterpreteur?: string;
     execPath?: string;
     createdAt?: number;
-    monitor:{[keyof: string]: any}
+    monitor: { [keyof: string]: any }
+    actions: string[]
 
 }
 
 export interface ChartHistory {
-    name:string,
+    name: string,
     cpus: number[],
 }
 
@@ -82,7 +83,7 @@ export class PM2Wrapper {
         });
     }
 
- 
+
 
     // Restart a process
     async restart(process: string | number): Promise<void> {
@@ -123,7 +124,7 @@ export class PM2Wrapper {
     }
 
     // Describe a process
-     async describe(process: string | number): Promise<ProcessDescription> {
+    async describe(process: string | number): Promise<ProcessDescription> {
         return new Promise((resolve, reject) => {
             pm2.describe(process, (err, processDescriptionList) => {
                 if (err) {
@@ -146,13 +147,14 @@ export class PM2Wrapper {
     async listProcesses(): Promise<ProcessData[]> {
         return new Promise((resolve, reject) => {
             pm2.list((err: any, processDescriptionList: any[]) => {
+
+
                 if (err) {
                     console.error(err);
                     reject(err);
                 }
 
                 const processList: ProcessData[] = processDescriptionList.map(procDesc => {
-
 
 
                     let data: ProcessData = {
@@ -178,7 +180,8 @@ export class PM2Wrapper {
                         execInterpreteur: procDesc.pm2_env.exec_interpreter,
                         execPath: procDesc.pm2_env.pm_exec_path,
                         createdAt: procDesc.pm2_env.created_at,
-                        monitor:procDesc.pm2_env.axm_monitor,
+                        monitor: procDesc.pm2_env.axm_monitor,
+                        actions: procDesc.pm2_env.axm_actions.filter((action: any) => !action.action_name.startsWith('km')).map((action: any) => action.action_name),
 
                     };
 
@@ -189,6 +192,27 @@ export class PM2Wrapper {
                 resolve(processList);
             });
         });
+    }
+
+
+    performActions(process: number, action: string) {
+
+        pm2.sendDataToProcessId(
+            process,
+            {
+                type: 'process:msg',
+                data: {
+                    action: action
+                },
+                topic: true,
+                id: process
+            }, (err) => {
+                if (err) {
+                    console.error(err)
+                }
+
+            })
+
     }
 
     flushLogs(name: string): Promise<void> {

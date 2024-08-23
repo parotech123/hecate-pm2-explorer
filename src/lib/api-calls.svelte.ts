@@ -7,43 +7,127 @@ import { CrudState } from "./stores/crud.state.svelte";
 import { errorsStore } from "./stores/errors.store";
 import { logsStore } from './stores/logs.store';
 import { splitterStore } from "./stores/splitter.store";
-import {Logging} from "./stores/logs.state.svelte";
+import { Logging } from "./stores/logs.state.svelte";
+import { db, type ProcessInfo } from "./db/db";
+import { maxBy } from "lodash-es";
+import { Server } from "./server.class";
 
 
 export let logging = new Logging();
 
 export let processes = new CrudState<ProcessData>('name');
+export let processInfos = new CrudState<ProcessInfo>('name');
+export let servers = new CrudState<Server>("ip")
+
+export function loadServ() {
+
+    let newServer = new Server()
+    newServer.ip = "host"
+    newServer.port = 3000
+    newServer.host = true
+
+    newServer.name = "host"
+
+    servers.add(newServer)
+
+
+}
 
 export async function updateProcesses() {
 
-    processes.loading = true
-    const res = await fetch('/api/processes');
-    const data: ProcessData[] = await res.json();
+    for await (const s of servers.data!) {
 
-    processes.reset()
-    processes.data = data
+        processes.loading = true
+        const res = await fetch('/api/s'+s.ip+'p'+s.port+'/processes');
+        const data: ProcessData[] = await res.json();
+
+        processes.reset()
+        processes.data = data
 
 
 
-    data.forEach(element => {
-        let history = chartDataStore.find((c) => c.name === element.name)
+        data.forEach(element => {
+            let history = chartDataStore.find((c) => c.name === element.name)
 
-        if (!history) {
+            if (!history) {
 
-            history = {
-                name: element.name,
-                cpus: []
+                history = {
+                    name: element.name,
+                    cpus: []
+                }
+
+                chartDataStore.push(history)
+
             }
 
-            chartDataStore.push(history)
+            history.cpus.push(element.cpu == 0 ? 0.01 : element.cpu)
+        });
 
+
+        let dataDB = await db.processInfos.toArray()
+
+        if (!dataDB || dataDB.length !== data.length) {
+            dataDB = data.map((d, i) => {
+                return {
+                    name: d.name,
+                    serial: i,
+                    show: true
+                }
+            })
+
+            dataDB.forEach((d, i) => {
+                try {
+
+                    let result = db.processInfos.put(d, "name").catch((error) => {
+                        console.log(error)
+                    })
+
+                } catch (error) {
+                    console.log(error)
+                }
+            })
+        } else {
+
+            processes.data.forEach((d, i) => {
+                let foundDB = dataDB.find((db) => db.name === d.name)
+
+                if (!foundDB) {
+
+
+                    let maxSerial = maxBy(dataDB, 'serial')
+                    let newProcess = {
+                        name: d.name,
+                        serial: (maxSerial?.serial ?? 0) + 1,
+                        show: true
+                    }
+                    dataDB.push(newProcess)
+
+                    db.processInfos.put(newProcess, "name")
+                }
+            })
         }
 
-        history.cpus.push(element.cpu == 0 ? 0.01 : element.cpu)
+        processInfos.data = dataDB
+        processes.loading = false
+    }
+
+}
+
+
+export async function performActions(id: number, action: string) {
+    processes.loading = true
+    let result = await fetch(`/api/processes/action/${id}?action=${action}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+
     });
 
-    console.log(chartDataStore);
+    console.log(result);
+    // await sleep(1000)
 
+    await updateProcesses();
     processes.loading = false
 
 }
