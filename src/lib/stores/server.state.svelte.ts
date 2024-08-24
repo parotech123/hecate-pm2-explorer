@@ -1,7 +1,7 @@
-import type { Server } from "../server.class";
+import type { Host } from "../host.svelte";
 import { CrudState } from "./crud.state.svelte";
 
 export class ServerState {
 
-    servers=new CrudState<Server>("ip")
+    servers=new CrudState<Host>("ip")
 }

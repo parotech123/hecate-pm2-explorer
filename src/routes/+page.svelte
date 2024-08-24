@@ -4,6 +4,7 @@
 		updateProcesses,
 		processInfos,
 		loadServ,
+		servers,
 	} from "src/lib/api-calls.svelte"
 
 	import {
@@ -27,8 +28,21 @@
 	import { LinkedChart } from "svelte-tiny-linked-charts"
 	import { db } from "src/lib/db/db"
 	import Icon from "@iconify/svelte"
+	import Host from "src/lib/components/Host.svelte"
+
 
 	$effect(() => {
+		if(servers.data) {
+			return
+		}
+		console.log("Loading servers")
+		// createSettingsState()
+		loadServ()
+		// localStorage.setItem('hecate_settings', JSON.stringify(settings))
+	})
+
+	$effect(() => {
+		console.log("Loading processes")
 		// createSettingsState()
 		updateProcesses()
 		// localStorage.setItem('hecate_settings', JSON.stringify(settings))
@@ -49,7 +63,7 @@
 
 	$effect(() => {
 
-		loadServ()
+
 		if (!processInfos.data) return
 
 		processInfos.data!.forEach((p) => {
@@ -84,7 +98,13 @@
 </svelte:head>
 
 <AppHeader></AppHeader>
-
+<div class="flex flex-row items-center gap-2">
+	{#if servers.data}
+	{#each (servers.data ?? []) as h}
+	<Host host={h}></Host>
+	{/each}
+	{/if}
+</div>
 <!-- <input bind:value={subnet} placeholder="Enter a subnet mask" />
 <button on:click={async()=>{fetchProcesses}}>Fetch Processes</button> -->
 

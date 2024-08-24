@@ -10,24 +10,25 @@ import { splitterStore } from "./stores/splitter.store";
 import { Logging } from "./stores/logs.state.svelte";
 import { db, type ProcessInfo } from "./db/db";
 import { maxBy } from "lodash-es";
-import { Server } from "./server.class";
+import { Host } from "./host.svelte";
 
 
 export let logging = new Logging();
 
 export let processes = new CrudState<ProcessData>('name');
 export let processInfos = new CrudState<ProcessInfo>('name');
-export let servers = new CrudState<Server>("ip")
+export let servers = new CrudState<Host>("ip")
 
 export function loadServ() {
 
-    let newServer = new Server()
+    let newServer = new Host()
+    // newServer.ip = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port;
     newServer.ip = "host"
-    newServer.port = 3000
+    newServer.port = Number(window.location.port) || 3000;
     newServer.host = true
 
     newServer.name = "host"
-
+    console.log(newServer)
     servers.add(newServer)
 
 
@@ -38,7 +39,7 @@ export async function updateProcesses() {
     for await (const s of servers.data!) {
 
         processes.loading = true
-        const res = await fetch('/api/s'+s.ip+'p'+s.port+'/processes');
+        const res = await fetch('/api/'+ s.ip  + '/processes');
         const data: ProcessData[] = await res.json();
 
         processes.reset()
