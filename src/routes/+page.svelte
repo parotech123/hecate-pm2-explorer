@@ -4,13 +4,13 @@
 		updateProcesses,
 		processInfos,
 		loadServ,
-		servers,
+		servers
 	} from "src/lib/api-calls.svelte"
 
 	import {
 		ToExludeMonitorKeys,
 		fromByteToHuman,
-		fromMillisecondsToDDHHmmss,
+		fromMillisecondsToDDHHmmss
 	} from "$lib/utils"
 	import { filter, timer } from "rxjs"
 
@@ -23,16 +23,16 @@
 	import { chartDataStore } from "src/lib/stores/chart-data.svelte"
 	import {
 		pauseBS$,
-		settingsStore,
+		settingsStore
 	} from "src/lib/stores/settings.state.svelte"
 	import { LinkedChart } from "svelte-tiny-linked-charts"
 	import { db } from "src/lib/db/db"
 	import Icon from "@iconify/svelte"
-	import Host from "src/lib/components/Host.svelte"
-
+	import HostTag from "src/lib/components/HostTag.svelte"
+	import { Host } from "src/lib/host.svelte"
 
 	$effect(() => {
-		if(servers.data) {
+		if (servers.data) {
 			return
 		}
 		console.log("Loading servers")
@@ -42,6 +42,9 @@
 	})
 
 	$effect(() => {
+		if (!servers.data) {
+			return
+		}
 		console.log("Loading processes")
 		// createSettingsState()
 		updateProcesses()
@@ -55,22 +58,20 @@
 			.map((pro) => {
 				return {
 					...processInfos.data!.find((p) => p.name == pro.name),
-					...pro,
+					...pro
 				}
 			})
 			.filter((p) => p.show)
 	})
 
 	$effect(() => {
-
-
 		if (!processInfos.data) return
 
 		processInfos.data!.forEach((p) => {
 			db.processInfos.put({
 				name: p.name,
 				serial: p.serial,
-				show: p.show,
+				show: p.show
 			})
 		})
 	})
@@ -80,31 +81,111 @@
 		processInfos.replace({
 			name: process.name,
 			serial: process.serial!,
-			show: process.show,
+			show: process.show
 		})
-		
 	}
 
 	$inspect(console.log(processUI))
 
 	let subnet = "192.168.1.0/24" // Default value
 
+	let hostDialog: any
+	let selectedHost = $state(new Host())
 
+	function editHost(host?: Host) {
+		let isNew = host ? false : true
 
+		host ||= new Host()
 
+		selectedHost = host
+		hostDialog.showModal()
+	}
+
+	async function saveHost() {
+		let hosts = await db.hosts.toArray()
+
+		console.log(hosts)
+		console.log(selectedHost)
+		if (hosts.find((h) => h.ip == selectedHost.ip)) {
+			console.log(selectedHost)
+			// servers.add(selectedHost)
+		} else {
+			await db.hosts.add({
+				host: selectedHost.host,
+				ip: selectedHost.ip,
+				name: selectedHost.name,
+				pinged: selectedHost.pinged,
+				port: selectedHost.port,
+				visibile: selectedHost.visibile
+			})
+		}
+
+		servers.replace(selectedHost)
+	}
 </script>
+
 <svelte:head>
-    <title>Hecate</title> 
+	<title>Hecate</title>
 </svelte:head>
 
 <AppHeader></AppHeader>
 <div class="flex flex-row items-center gap-2">
 	{#if servers.data}
-	{#each (servers.data ?? []) as h}
-	<Host host={h}></Host>
-	{/each}
+		{#each servers.data ?? [] as host}
+			<HostTag {host}></HostTag>
+		{/each}
 	{/if}
+	<button
+		class="btn"
+		onclick={() => {
+			editHost()
+		}}>open modal</button
+	>
 </div>
+<dialog id="host_modal" class="modal" bind:this={hostDialog}>
+	{#if selectedHost}
+		<div class="modal-box">
+			<h3 class="text-lg font-bold">Add Host</h3>
+			<label class="form-control w-full max-w-xs">
+				<div class="label">
+					<span class="label-text">Host name</span>
+				</div>
+				<input
+					type="text"
+					bind:value={selectedHost.name}
+					placeholder="Type here"
+					class="input input-bordered w-full max-w-xs"
+				/>
+			</label>
+			<label class="form-control w-full max-w-xs">
+				<div class="label">
+					<span class="label-text">Host address</span>
+				</div>
+				<input
+					type="text"
+					bind:value={selectedHost.ip}
+					placeholder="Type here"
+					class="input input-bordered w-full max-w-xs"
+				/>
+			</label>
+			<div class="flex flex-row items-center justify-end gap-2">
+				<button
+					class="btn"
+					onclick={() => {
+						hostDialog.close()
+					}}>Cancel</button
+				>
+				<button
+					class="btn btn-success"
+					onclick={() => {
+						saveHost()
+						hostDialog.close()
+					}}>Save</button
+				>
+			</div>
+		</div>
+	{/if}
+</dialog>
 <!-- <input bind:value={subnet} placeholder="Enter a subnet mask" />
 <button on:click={async()=>{fetchProcesses}}>Fetch Processes</button> -->
 
@@ -146,7 +227,7 @@
 
 								<button
 									class="btn btn-icon-sm btn-ghost"
-									on:click={() => hideProcess(process)}
+									onclick={() => hideProcess(process)}
 								>
 									<Icon
 										icon="iconamoon:eye-off"

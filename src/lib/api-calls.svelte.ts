@@ -19,28 +19,47 @@ export let processes = new CrudState<ProcessData>('name');
 export let processInfos = new CrudState<ProcessInfo>('name');
 export let servers = new CrudState<Host>("ip")
 
-export function loadServ() {
+export async function loadServ() {
 
-    let newServer = new Host()
-    // newServer.ip = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port;
-    newServer.ip = "host"
-    newServer.port = Number(window.location.port) || 3000;
-    newServer.host = true
+    let hosts = await db.hosts.toArray()
 
-    newServer.name = "host"
-    console.log(newServer)
-    servers.add(newServer)
+    console.log(hosts)
+
+
+    if (!hosts.find(h => h.ip == "host")) {
+        let newServer = new Host()
+        // newServer.ip = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port;
+        newServer.ip = "host"
+        newServer.port = Number(window.location.port) || 3000;
+        newServer.host = true
+
+        newServer.name = "host"
+        console.log(newServer)
+        hosts.push(newServer)
+    }
+
+    servers.add(hosts)
+
 
 
 }
 
 export async function updateProcesses() {
 
+
+    if (!servers.data) return
+
     for await (const s of servers.data!) {
 
         processes.loading = true
-        const res = await fetch('/api/'+ s.ip  + '/processes');
-        const data: ProcessData[] = await res.json();
+        const res = await fetch('/api/processes' + s.host ? "" : "?host=" + s.ip);
+        let data: ProcessData[]
+        try {
+            data = await res.json();
+        } catch (error) {
+            console.log(error)
+            data = []
+        }
 
         processes.reset()
         processes.data = data

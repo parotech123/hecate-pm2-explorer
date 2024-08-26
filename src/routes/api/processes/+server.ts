@@ -10,21 +10,21 @@ import type { RequestHandler } from '@sveltejs/kit';
 
 const TIMEOUT = 3000;  // 5 seconds
 
-export const GET: RequestHandler = async ({ request, params }) => {
+export const GET: RequestHandler = async ({ request, params, url }) => {
 
 
-        let ip = params.ip
+        let host = url.searchParams.get('host')
 
-        if (!ip) {
-                return new Response('No ip provided', { status: 400 })
-        }
 
-        const host = ip
-        console.log("retrieving process from " + ip)
 
-        if (ip != "host") {
 
-                let urlToCall = host  +"/api/host/processes"
+
+        if (host) {
+
+
+                console.log("Host specified, using host: " + host)
+
+                let urlToCall = host + "/api/processes"
 
 
                 let data = {}
@@ -33,6 +33,7 @@ export const GET: RequestHandler = async ({ request, params }) => {
 
         } else {
 
+                console.log("No host specified, using local host")
 
 
                 await pm2.connect();
