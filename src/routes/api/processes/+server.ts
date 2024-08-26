@@ -1,5 +1,5 @@
 
-import { PM2Wrapper } from '$lib/PM2Wrapper';
+import { PM2Wrapper, type ProcessData } from '$lib/PM2Wrapper';
 
 
 
@@ -27,8 +27,19 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
                 let urlToCall = host + "/api/processes"
 
 
-                let data = {}
+                let data: ProcessData[] = []
 
+                try {
+
+                        const res = await fetch(urlToCall);
+
+                        data = await res.json();
+
+                } catch (error) {
+                        console.log(error)
+                        data = []
+                }
+                console.log(data)
                 return new Response(JSON.stringify(data))
 
         } else {
