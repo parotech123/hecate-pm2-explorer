@@ -48,11 +48,16 @@ export async function updateProcesses() {
 
 
     if (!servers.data) return
+    processes.reset()
 
+    processes.loading = true
     for await (const s of servers.data!) {
 
-        processes.loading = true
-        const res = await fetch('/api/processes' + (s.host ? "" : "?host=" + s.ip));
+
+        let urlToCall = s.host ? "/api/processes" : s.ip + "/api/processes"
+        console.log("Going To call: " + urlToCall)
+        // const res = await fetch('/api/processes' + (s.host ? "" : "?host=" + s.ip));
+        const res = await fetch(urlToCall);
         let data: ProcessData[]
         try {
             data = await res.json();
@@ -61,10 +66,9 @@ export async function updateProcesses() {
             data = []
         }
 
-        processes.reset()
-        processes.data = data
+        processes.add(data)
 
-
+        console.log("processes found on server " + s.ip, data.length)
 
         data.forEach(element => {
             let history = chartDataStore.find((c) => c.name === element.name)
@@ -108,7 +112,7 @@ export async function updateProcesses() {
             })
         } else {
 
-            processes.data.forEach((d, i) => {
+            processes.data!.forEach((d, i) => {
                 let foundDB = dataDB.find((db) => db.name === d.name)
 
                 if (!foundDB) {
@@ -127,9 +131,9 @@ export async function updateProcesses() {
             })
         }
 
-        processInfos.data = dataDB
-        processes.loading = false
+        processInfos.replace(dataDB)
     }
+    processes.loading = false
 
 }
 

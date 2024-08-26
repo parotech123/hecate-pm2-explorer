@@ -50,5 +50,8 @@ export default defineConfig({
 		// 	cert: fs.readFileSync("me.king-rudd.ts.net.crt"),
 		// 	key: fs.readFileSync("me.king-rudd.ts.net.key")
 		// }
+	},
+	server:{
+		port:5000
 	}
 });

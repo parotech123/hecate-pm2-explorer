@@ -31,15 +31,24 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
 
                 try {
 
-                        const res = await fetch(urlToCall);
+                        console.log("Calling: " + urlToCall)
 
+                        const res = await fetch(urlToCall, {
+                                headers: {
+                                        'Content-Type': 'application/json'
+                                },
+                                method: 'GET',
+                        });
+
+                        let texgt = await res.text()
+                        console.log(texgt)
                         data = await res.json();
 
                 } catch (error) {
-                        console.log(error)
+                        console.error(error)
                         data = []
                 }
-                console.log(data)
+                // console.log(data)
                 return new Response(JSON.stringify(data))
 
         } else {
