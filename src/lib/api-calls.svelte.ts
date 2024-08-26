@@ -52,7 +52,7 @@ export async function updateProcesses() {
     for await (const s of servers.data!) {
 
         processes.loading = true
-        const res = await fetch('/api/processes' + s.host ? "" : "?host=" + s.ip);
+        const res = await fetch('/api/processes' + (s.host ? "" : "?host=" + s.ip));
         let data: ProcessData[]
         try {
             data = await res.json();

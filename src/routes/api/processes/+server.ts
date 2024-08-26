@@ -16,7 +16,7 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
         let host = url.searchParams.get('host')
 
 
-
+        console.log("Host: " + host)
 
 
         if (host) {
