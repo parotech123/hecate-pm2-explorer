@@ -49,15 +49,16 @@ export async function updateProcesses() {
 
     if (!servers.data) return
     processes.reset()
+    processInfos.reset()
 
     processes.loading = true
     for await (const s of servers.data!) {
 
-
+        console.log(s.ip)
         let urlToCall = s.host ? "/api/processes" : s.ip + "/api/processes"
-        console.log("Going To call: " + urlToCall)
-        // const res = await fetch('/api/processes' + (s.host ? "" : "?host=" + s.ip));
-        const res = await fetch(urlToCall);
+        // console.log("Going To call: " + urlToCall)
+        const res = await fetch('/api/processes' + (s.host ? "" : "?host=" + s.ip));
+        // const res = await fetch(urlToCall);
         let data: ProcessData[]
         try {
             data = await res.json();
@@ -131,10 +132,10 @@ export async function updateProcesses() {
             })
         }
 
-        processInfos.replace(dataDB)
+        processInfos.add(dataDB)
     }
     processes.loading = false
-
+    console.log("Processes updated")
 }
 
 

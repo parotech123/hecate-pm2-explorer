@@ -7,6 +7,7 @@ const pm2 = new PM2Wrapper();
 
 
 import type { RequestHandler } from '@sveltejs/kit';
+import axios from 'axios';
 
 const TIMEOUT = 3000;  // 5 seconds
 
@@ -32,17 +33,20 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
                 try {
 
                         console.log("Calling: " + urlToCall)
-
-                        const res = await fetch(urlToCall, {
-                                headers: {
-                                        'Content-Type': 'application/json'
-                                },
+                        const res = await axios.get(urlToCall, {
+                                timeout: TIMEOUT,
                                 method: 'GET',
                         });
+                        // const res = await fetch(urlToCall, {
+                        //         headers: {
+                        //                 'Content-Type': 'application/json'
+                        //         },
+                        //         method: 'GET',
+                        // });
 
-                        let texgt = await res.text()
+                        let texgt = await res.data
                         console.log(texgt)
-                        data = await res.json();
+                        data = await res.data;
 
                 } catch (error) {
                         console.error(error)

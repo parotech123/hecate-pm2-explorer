@@ -1142,7 +1142,7 @@ function createReadableStream(file) {
 	return /** @type {ReadableStream} */ (Readable.toWeb(createReadStream(file)));
 }
 
-/* global "" */
+/* global "HECATE_" */
 
 const server = new Server(manifest);
 
@@ -1247,7 +1247,7 @@ const ssr = async (req, res) => {
 					if (!(address_header in req.headers)) {
 						throw new Error(
 							`Address header was specified with ${
-								"" + 'ADDRESS_HEADER'
+								"HECATE_" + 'ADDRESS_HEADER'
 							}=${address_header} but is absent from request`
 						);
 					}
@@ -1258,12 +1258,12 @@ const ssr = async (req, res) => {
 						const addresses = value.split(',');
 
 						if (xff_depth < 1) {
-							throw new Error(`${"" + 'XFF_DEPTH'} must be a positive integer`);
+							throw new Error(`${"HECATE_" + 'XFF_DEPTH'} must be a positive integer`);
 						}
 
 						if (xff_depth > addresses.length) {
 							throw new Error(
-								`${"" + 'XFF_DEPTH'} is ${xff_depth}, but only found ${
+								`${"HECATE_" + 'XFF_DEPTH'} is ${xff_depth}, but only found ${
 									addresses.length
 								} addresses`
 							);
